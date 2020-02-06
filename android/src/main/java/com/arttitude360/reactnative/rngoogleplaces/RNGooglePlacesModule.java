@@ -109,11 +109,11 @@ public class RNGooglePlacesModule extends ReactContextBaseJavaModule implements 
                 resolvePromise(map);
             } else if (resultCode == AutocompleteActivity.RESULT_ERROR) {
                 Status status = Autocomplete.getStatusFromIntent(intent);
-                
+
                 rejectPromise("E_RESULT_ERROR", new Error(status.getStatusMessage()));
             } else if (resultCode == AutocompleteActivity.RESULT_CANCELED) {
                 rejectPromise("E_USER_CANCELED", new Error("Search cancelled"));
-            }           
+            }
         }
     }
 
@@ -144,18 +144,32 @@ public class RNGooglePlacesModule extends ReactContextBaseJavaModule implements 
         String initialQuery = options.getString("initialQuery");
         boolean useOverlay = options.getBoolean("useOverlay");
 
-        ReadableMap locationBias = options.getMap("locationBias");
-        double biasToLatitudeSW = locationBias.getDouble("latitudeSW");
-        double biasToLongitudeSW = locationBias.getDouble("longitudeSW");
-        double biasToLatitudeNE = locationBias.getDouble("latitudeNE");
-        double biasToLongitudeNE = locationBias.getDouble("longitudeNE");
+        double biasToLatitudeSW = 0;
+        double biasToLongitudeSW = 0;
+        double biasToLatitudeNE = 0;
+        double biasToLongitudeNE = 0;
 
-        ReadableMap locationRestriction = options.getMap("locationRestriction");
-        double restrictToLatitudeSW = locationRestriction.getDouble("latitudeSW");
-        double restrictToLongitudeSW = locationRestriction.getDouble("longitudeSW");
-        double restrictToLatitudeNE = locationRestriction.getDouble("latitudeNE");
-        double restrictToLongitudeNE = locationRestriction.getDouble("longitudeNE");
-        
+        if (options.hasKey("locationBias") && options.getType("locationBias") == ReadableType.Map) {
+            ReadableMap locationBias = options.getMap("locationBias");
+            biasToLatitudeSW = locationBias.getDouble("latitudeSW");
+            biasToLongitudeSW = locationBias.getDouble("longitudeSW");
+            biasToLatitudeNE = locationBias.getDouble("latitudeNE");
+            biasToLongitudeNE = locationBias.getDouble("longitudeNE");
+        }
+
+        double restrictToLatitudeSW = 0;
+        double restrictToLongitudeSW = 0;
+        double restrictToLatitudeNE = 0;
+        double restrictToLongitudeNE = 0;
+
+        if (options.hasKey("locationRestriction") && options.getType("locationRestriction") == ReadableType.Map) {
+            ReadableMap locationRestriction = options.getMap("locationRestriction");
+            restrictToLatitudeSW = locationRestriction.getDouble("latitudeSW");
+            restrictToLongitudeSW = locationRestriction.getDouble("longitudeSW");
+            restrictToLatitudeNE = locationRestriction.getDouble("latitudeNE");
+            restrictToLongitudeNE = locationRestriction.getDouble("longitudeNE");
+        }
+
         this.lastSelectedFields = getPlaceFields(fields.toArrayList(), false);
         Autocomplete.IntentBuilder autocompleteIntent = new Autocomplete.IntentBuilder(
                 useOverlay ? AutocompleteActivityMode.OVERLAY : AutocompleteActivityMode.FULLSCREEN, this.lastSelectedFields);
@@ -182,7 +196,7 @@ public class RNGooglePlacesModule extends ReactContextBaseJavaModule implements 
 
         autocompleteIntent.setTypeFilter(getFilterType(type));
 
-        currentActivity.startActivityForResult(autocompleteIntent.build(this.reactContext.getApplicationContext()), AUTOCOMPLETE_REQUEST_CODE);        
+        currentActivity.startActivityForResult(autocompleteIntent.build(this.reactContext.getApplicationContext()), AUTOCOMPLETE_REQUEST_CODE);
     }
 
     @ReactMethod
@@ -199,26 +213,40 @@ public class RNGooglePlacesModule extends ReactContextBaseJavaModule implements 
         country = country.isEmpty() ? null : country;
         boolean useSessionToken = options.getBoolean("useSessionToken");
 
-        ReadableMap locationBias = options.getMap("locationBias");
-        double biasToLatitudeSW = locationBias.getDouble("latitudeSW");
-        double biasToLongitudeSW = locationBias.getDouble("longitudeSW");
-        double biasToLatitudeNE = locationBias.getDouble("latitudeNE");
-        double biasToLongitudeNE = locationBias.getDouble("longitudeNE");
+        double biasToLatitudeSW = 0;
+        double biasToLongitudeSW = 0;
+        double biasToLatitudeNE = 0;
+        double biasToLongitudeNE = 0;
 
-        ReadableMap locationRestriction = options.getMap("locationRestriction");
-        double restrictToLatitudeSW = locationRestriction.getDouble("latitudeSW");
-        double restrictToLongitudeSW = locationRestriction.getDouble("longitudeSW");
-        double restrictToLatitudeNE = locationRestriction.getDouble("latitudeNE");
-        double restrictToLongitudeNE = locationRestriction.getDouble("longitudeNE");
-        
+        if (options.hasKey("locationBias") && options.getType("locationBias") == ReadableType.Map) {
+            ReadableMap locationBias = options.getMap("locationBias");
+            biasToLatitudeSW = locationBias.getDouble("latitudeSW");
+            biasToLongitudeSW = locationBias.getDouble("longitudeSW");
+            biasToLatitudeNE = locationBias.getDouble("latitudeNE");
+            biasToLongitudeNE = locationBias.getDouble("longitudeNE");
+        }
+
+        double restrictToLatitudeSW = 0;
+        double restrictToLongitudeSW = 0;
+        double restrictToLatitudeNE = 0;
+        double restrictToLongitudeNE = 0;
+
+        if (options.hasKey("locationRestriction") && options.getType("locationRestriction") == ReadableType.Map) {
+            ReadableMap locationRestriction = options.getMap("locationRestriction");
+            restrictToLatitudeSW = locationRestriction.getDouble("latitudeSW");
+            restrictToLongitudeSW = locationRestriction.getDouble("longitudeSW");
+            restrictToLatitudeNE = locationRestriction.getDouble("latitudeNE");
+            restrictToLongitudeNE = locationRestriction.getDouble("longitudeNE");
+        }
+
         FindAutocompletePredictionsRequest.Builder requestBuilder =
         FindAutocompletePredictionsRequest.builder()
         .setQuery(query);
-        
+
         if (country != null) {
             requestBuilder.setCountry(country);
         }
-        
+
         if (biasToLatitudeSW != 0 && biasToLongitudeSW != 0 && biasToLatitudeNE != 0 && biasToLongitudeNE != 0) {
             requestBuilder.setLocationBias(RectangularBounds.newInstance(
                 new LatLng(biasToLatitudeSW, biasToLongitudeSW),
@@ -230,16 +258,16 @@ public class RNGooglePlacesModule extends ReactContextBaseJavaModule implements 
                 new LatLng(restrictToLatitudeSW, restrictToLongitudeSW),
                 new LatLng(restrictToLatitudeNE, restrictToLongitudeNE)));
         }
-            
+
         requestBuilder.setTypeFilter(getFilterType(type));
 
         if (useSessionToken) {
             requestBuilder.setSessionToken(AutocompleteSessionToken.newInstance());
         }
-            
+
         Task<FindAutocompletePredictionsResponse> task =
             placesClient.findAutocompletePredictions(requestBuilder.build());
-    
+
         task.addOnSuccessListener(
             (response) -> {
                 if (response.getAutocompletePredictions().size() == 0) {
@@ -247,16 +275,16 @@ public class RNGooglePlacesModule extends ReactContextBaseJavaModule implements 
                     promise.resolve(emptyResult);
                     return;
                 }
-    
+
                 WritableArray predictionsList = Arguments.createArray();
-    
+
                 for (AutocompletePrediction prediction : response.getAutocompletePredictions()) {
                     WritableMap map = Arguments.createMap();
                     map.putString("fullText", prediction.getFullText(null).toString());
                     map.putString("primaryText", prediction.getPrimaryText(null).toString());
                     map.putString("secondaryText", prediction.getSecondaryText(null).toString());
                     map.putString("placeID", prediction.getPlaceId().toString());
-    
+
                     if (prediction.getPlaceTypes().size() > 0) {
                         List<String> types = new ArrayList<>();
                         for (Place.Type placeType : prediction.getPlaceTypes()) {
@@ -264,18 +292,18 @@ public class RNGooglePlacesModule extends ReactContextBaseJavaModule implements 
                         }
                         map.putArray("types", Arguments.fromArray(types.toArray(new String[0])));
                     }
-    
+
                     predictionsList.pushMap(map);
                 }
-    
+
                 promise.resolve(predictionsList);
-    
+
             });
-    
+
         task.addOnFailureListener(
             (exception) -> {
                 promise.reject("E_AUTOCOMPLETE_ERROR", new Error(exception.getMessage()));
-            });       
+            });
     }
 
     @ReactMethod
@@ -286,7 +314,7 @@ public class RNGooglePlacesModule extends ReactContextBaseJavaModule implements 
             promise.reject("E_API_KEY_ERROR", new Error("No API key defined in gradle.properties or errors initializing Places"));
             return;
         }
-        
+
         List<Place.Field> selectedFields = getPlaceFields(fields.toArrayList(), false);
 
         FetchPlaceRequest request = FetchPlaceRequest.builder(placeID, selectedFields).build();
@@ -306,7 +334,7 @@ public class RNGooglePlacesModule extends ReactContextBaseJavaModule implements 
         if (ContextCompat.checkSelfPermission(this.reactContext.getApplicationContext(), permission.ACCESS_WIFI_STATE)
             != PackageManager.PERMISSION_GRANTED
         || ContextCompat.checkSelfPermission(this.reactContext.getApplicationContext(), permission.ACCESS_FINE_LOCATION)
-            != PackageManager.PERMISSION_GRANTED) {        
+            != PackageManager.PERMISSION_GRANTED) {
             promise.reject("E_CURRENT_PLACE_ERROR", new Error("Both ACCESS_WIFI_STATE & ACCESS_FINE_LOCATION permissions are required"));
             return;
         }
@@ -481,7 +509,7 @@ public class RNGooglePlacesModule extends ReactContextBaseJavaModule implements 
         if (selectedFields.contains(Place.Field.OPENING_HOURS)) {
             if (place.getOpeningHours() != null) {
                 List<String> openingHours = new ArrayList<>(place.getOpeningHours().getWeekdayText());
-                map.putArray("openingHours", Arguments.fromArray(openingHours.toArray(new String[0])));                
+                map.putArray("openingHours", Arguments.fromArray(openingHours.toArray(new String[0])));
             } else {
                 WritableArray emptyResult = Arguments.createArray();
                 map.putArray("openingHours", emptyResult);
@@ -555,7 +583,7 @@ public class RNGooglePlacesModule extends ReactContextBaseJavaModule implements 
 
         for (Object placeField : placeFields) {
             if (RNGooglePlacesPlaceFieldEnum.findByFieldKey(placeField.toString()) != null) {
-                selectedFields.add(RNGooglePlacesPlaceFieldEnum.findByFieldKey(placeField.toString()).getField());            
+                selectedFields.add(RNGooglePlacesPlaceFieldEnum.findByFieldKey(placeField.toString()).getField());
             }
         }
 
@@ -568,7 +596,7 @@ public class RNGooglePlacesModule extends ReactContextBaseJavaModule implements 
 
     private boolean checkPermission(String permission) {
         Activity currentActivity = getCurrentActivity();
-        
+
         boolean hasPermission =
             ContextCompat.checkSelfPermission(this.reactContext.getApplicationContext(), permission) == PackageManager.PERMISSION_GRANTED;
         if (!hasPermission && currentActivity != null) {
