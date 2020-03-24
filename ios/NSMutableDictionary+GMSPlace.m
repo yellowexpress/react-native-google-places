@@ -1,3 +1,4 @@
+#import <GoogleMapsBase/GoogleMapsBase.h>
 #import "NSMutableDictionary+GMSPlace.h"
 
 @implementation NSMutableDictionary (GMSPlace)
@@ -5,7 +6,7 @@
 + (instancetype)dictionaryWithGMSPlace:(GMSPlace*)place
 {
     NSMutableDictionary *placeData = [[NSMutableDictionary alloc] init];
-    
+
     if (place.name) {
         placeData[@"name"] = place.name;
     }
@@ -47,7 +48,7 @@
     if (place.rating) {
         placeData[@"rating"] = [NSNumber numberWithDouble:place.rating];
     }
-    
+
     if (place.viewport) {
         NSMutableDictionary *viewportMap = [[NSMutableDictionary alloc] init];
         viewportMap[@"latitudeNE"] = [NSNumber numberWithDouble:place.viewport.northEast.latitude];
@@ -65,7 +66,7 @@
 
         placeData[@"placeCode"] = plusCodeMap;
     }
-    
+
     if (place.addressComponents) {
         NSMutableArray *addressComponents = [[NSMutableArray alloc] init];
         for( int i=0;i<place.addressComponents.count;i++) {
@@ -73,10 +74,10 @@
             addressComponent[@"types"] = place.addressComponents[i].types;
             addressComponent[@"name"] = place.addressComponents[i].name;
             addressComponent[@"shortName"] = place.addressComponents[i].shortName;
-            
+
             [addressComponents addObject:addressComponent];
         }
-        
+
         placeData[@"addressComponents"] = addressComponents;
     }
 
@@ -87,7 +88,7 @@
     if (place.userRatingsTotal) {
         placeData[@"userRatingsTotal"] = @(place.userRatingsTotal);
     }
-    
+
     return placeData;
 }
 
